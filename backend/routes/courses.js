@@ -376,7 +376,7 @@ router.get('/pending', [auth, authorize('admin')], async (req, res) => {
 // @route   GET /api/courses/:id/performance
 // @desc    Get course performance metrics
 // @access  Private (Instructor, Admin)
-router.get('/:id/performance', [auth, authorize(['instructor', 'admin'])], async (req, res) => {
+router.get('/:id/performance', [auth, authorize('instructor', 'admin')], async (req, res) => {
   try {
     const courseId = req.params.id;
     const Assignment = require('../models/Assignment');

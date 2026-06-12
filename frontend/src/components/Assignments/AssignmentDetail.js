@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import { 
+import {
   DocumentTextIcon,
   ClockIcon,
   PaperClipIcon,
@@ -27,14 +27,7 @@ const AssignmentDetail = () => {
     attachments: []
   });
 
-  useEffect(() => {
-    fetchAssignmentDetails();
-    if (user?.role === 'student') {
-      fetchSubmission();
-    }
-  }, [id]);
-
-  const fetchAssignmentDetails = async () => {
+  const fetchAssignmentDetails = useCallback(async () => {
     try {
       const response = await axios.get(`/api/assignments/${id}`);
       setAssignment(response.data);
@@ -45,16 +38,24 @@ const AssignmentDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
 
-  const fetchSubmission = async () => {
+  const fetchSubmission = useCallback(async () => {
+    if (!user?._id) return;
     try {
       const response = await axios.get(`/api/submissions/assignment/${id}/student/${user._id}`);
       setSubmission(response.data);
     } catch (error) {
       // No submission found - this is normal
     }
-  };
+  }, [id, user?._id]);
+
+  useEffect(() => {
+    fetchAssignmentDetails();
+    if (user?.role === 'student') {
+      fetchSubmission();
+    }
+  }, [fetchAssignmentDetails, fetchSubmission, user?.role]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -85,14 +86,14 @@ const AssignmentDetail = () => {
   };
 
   const isOverdue = assignment?.dueDate && isValidDate(assignment.dueDate) ? new Date() > new Date(assignment.dueDate) : false;
-  const canSubmit = user?.role === 'student' && !submission && 
+  const canSubmit = user?.role === 'student' && !submission &&
     (assignment?.allowLateSubmission || !isOverdue);
 
   const formatDueDate = (dueDate) => {
     if (!dueDate) return 'No due date set';
-    
+
     if (!isValidDate(dueDate)) return 'Invalid date';
-    
+
     return formatDateLong(dueDate);
   };
 
@@ -124,7 +125,7 @@ const AssignmentDetail = () => {
               <p className="text-gray-600">{assignment.course?.title} • {assignment.course?.courseCode}</p>
             </div>
           </div>
-          
+
           {submission ? (
             <div className="flex items-center text-green-600">
               <CheckCircleIcon className="h-6 w-6 mr-2" />
@@ -208,7 +209,7 @@ const AssignmentDetail = () => {
             /* Existing Submission */
             <div className="card">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Submission</h2>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
@@ -217,10 +218,9 @@ const AssignmentDetail = () => {
                   </div>
                   <div>
                     <span className="font-medium text-gray-600">Status:</span>
-                    <p className={`font-medium ${
-                      submission.status === 'graded' ? 'text-green-600' :
+                    <p className={`font-medium ${submission.status === 'graded' ? 'text-green-600' :
                       submission.status === 'submitted' ? 'text-blue-600' : 'text-gray-600'
-                    }`}>
+                      }`}>
                       {submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
                     </p>
                   </div>
@@ -280,7 +280,7 @@ const AssignmentDetail = () => {
             /* Submission Form */
             <div className="card">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Submit Assignment</h2>
-              
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 {assignment.submissionType !== 'file' && (
                   <div>
@@ -325,7 +325,7 @@ const AssignmentDetail = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     {submissionForm.attachments.length > 0 && (
                       <div className="mt-4">
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Files:</h4>
@@ -368,7 +368,7 @@ const AssignmentDetail = () => {
                   {isOverdue ? 'Assignment Overdue' : 'Submission Closed'}
                 </h3>
                 <p className="text-gray-600">
-                  {isOverdue 
+                  {isOverdue
                     ? 'This assignment is past the due date and late submissions are not allowed.'
                     : 'The submission period for this assignment has ended.'
                   }
@@ -383,4 +383,3 @@ const AssignmentDetail = () => {
 };
 
 export default AssignmentDetail;
-

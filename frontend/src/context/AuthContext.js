@@ -3,7 +3,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 // Set axios defaults
-axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const AuthContext = createContext();
 
@@ -91,8 +91,9 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/me');
-        setUser(response.data);
+        const response = await axios.get('/api/auth/me');
+        // API returns { user: {...} }
+        setUser(response.data.user);
       } catch (error) {
         console.error('Error refreshing user data:', error);
       }

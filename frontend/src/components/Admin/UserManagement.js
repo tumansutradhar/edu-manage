@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { 
+import {
   UserGroupIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -16,18 +16,14 @@ const UserManagement = () => {
   const [selectedRole, setSelectedRole] = useState('');
   const [pagination, setPagination] = useState({});
 
-  useEffect(() => {
-    fetchUsers();
-  }, [selectedRole]);
-
-  const fetchUsers = async (page = 1) => {
+  const fetchUsers = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '10'
       });
-      
+
       if (selectedRole) params.append('role', selectedRole);
 
       const response = await axios.get(`/api/users?${params}`);
@@ -39,7 +35,11 @@ const UserManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedRole]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const approveUser = async (userId) => {
     try {
@@ -204,15 +204,13 @@ const UserManagement = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col space-y-1">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
                         {user.isActive ? 'Active' : 'Inactive'}
                       </span>
                       {user.role !== 'student' && (
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          user.isApproved ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.isApproved ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
                           {user.isApproved ? 'Approved' : 'Pending'}
                         </span>
                       )}
@@ -266,11 +264,11 @@ const UserManagement = () => {
                 Previous
               </button>
             )}
-            
+
             <span className="flex items-center px-4 py-2 text-sm text-gray-600">
               Page {pagination.current} of {pagination.pages}
             </span>
-            
+
             {pagination.hasNext && (
               <button
                 onClick={() => fetchUsers(pagination.current + 1)}

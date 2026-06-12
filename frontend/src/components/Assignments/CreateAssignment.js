@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
@@ -22,28 +22,29 @@ const CreateAssignment = () => {
     allowedFileTypes: ['pdf', 'doc', 'docx'],
     maxFileSize: 10485760, // 10MB
     instructions: '',
-    isPublished: false,
+    isPublished: true,
     allowLateSubmission: true,
     latePenalty: 10,
-    rubric: []
+    rubric: [],
   });
 
-  useEffect(() => {
-    fetchInstructorCourses();
-  }, []);
-
-  const fetchInstructorCourses = async () => {
+  const fetchInstructorCourses = useCallback(async () => {
+    if (!user?._id) return;
     try {
       const response = await axios.get(`/api/courses/instructor/${user._id}`);
       setCourses(response.data);
     } catch (error) {
       console.error('Error fetching courses:', error);
     }
-  };
+  }, [user?._id]);
+
+  useEffect(() => {
+    fetchInstructorCourses();
+  }, [fetchInstructorCourses]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (name === 'dueDate') {
       // Store the datetime-local value directly (YYYY-MM-DDTHH:mm format)
       setFormData(prev => ({
@@ -53,8 +54,8 @@ const CreateAssignment = () => {
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : 
-                 type === 'number' ? parseInt(value) || 0 : value
+        [name]: type === 'checkbox' ? checked :
+          type === 'number' ? parseInt(value) || 0 : value
       }));
     }
   };
@@ -62,7 +63,7 @@ const CreateAssignment = () => {
   const handleFileTypeChange = (fileType, checked) => {
     setFormData(prev => ({
       ...prev,
-      allowedFileTypes: checked 
+      allowedFileTypes: checked
         ? [...prev.allowedFileTypes, fileType]
         : prev.allowedFileTypes.filter(type => type !== fileType)
     }));
@@ -89,7 +90,7 @@ const CreateAssignment = () => {
   const updateRubricCriteria = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      rubric: prev.rubric.map((item, i) => 
+      rubric: prev.rubric.map((item, i) =>
         i === index ? { ...item, [field]: field === 'points' ? parseInt(value) || 0 : value } : item
       )
     }));
@@ -147,13 +148,6 @@ const CreateAssignment = () => {
     { value: 'zip', label: 'ZIP' }
   ];
 
-  // Get minimum date (tomorrow)
-  const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
-  };
-
   // Get minimum datetime (current time + 1 hour)
   const getMinDateTime = () => {
     const minTime = new Date();
@@ -174,7 +168,7 @@ const CreateAssignment = () => {
         {/* Basic Information */}
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -297,7 +291,7 @@ const CreateAssignment = () => {
         {/* Submission Settings */}
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Submission Settings</h2>
-          
+
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -346,9 +340,9 @@ const CreateAssignment = () => {
                     min="1"
                     max="100"
                     value={Math.round(formData.maxFileSize / 1024 / 1024)}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      maxFileSize: parseInt(e.target.value) * 1024 * 1024 
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      maxFileSize: parseInt(e.target.value) * 1024 * 1024
                     }))}
                     className="input"
                   />
@@ -403,7 +397,7 @@ const CreateAssignment = () => {
         {/* Assignment Files */}
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Assignment Files</h2>
-          
+
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
             <div className="text-center">
               <CloudArrowUpIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -422,7 +416,7 @@ const CreateAssignment = () => {
               </p>
             </div>
           </div>
-          
+
           {attachments.length > 0 && (
             <div className="mt-4">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Files:</h4>
@@ -450,7 +444,7 @@ const CreateAssignment = () => {
               Add Criteria
             </button>
           </div>
-          
+
           {formData.rubric.length === 0 ? (
             <p className="text-gray-500 text-center py-4">
               No rubric criteria added. Click "Add Criteria" to get started.

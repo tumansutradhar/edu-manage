@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import { 
+import {
   CalendarIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -27,22 +27,7 @@ const AttendanceView = () => {
     duration: 60
   });
 
-  useEffect(() => {
-    if (user?.role === 'student') {
-      fetchStudentAttendance();
-    } else {
-      fetchInstructorCourses();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (selectedCourse && user?.role !== 'student') {
-      fetchCourseAttendance();
-      fetchEnrolledStudents();
-    }
-  }, [selectedCourse]);
-
-  const fetchStudentAttendance = async () => {
+  const fetchStudentAttendance = useCallback(async () => {
     try {
       const response = await axios.get(`/api/attendance/student/${user._id}`);
       setAttendanceData(response.data);
@@ -51,32 +36,34 @@ const AttendanceView = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id]);
 
-  const fetchInstructorCourses = async () => {
+  const fetchInstructorCourses = useCallback(async () => {
     try {
       const response = await axios.get(`/api/courses/instructor/${user._id}`);
       setCourses(response.data);
       if (response.data.length > 0) {
-        setSelectedCourse(response.data[0]._id);
+        setSelectedCourse(response.data._id);
       }
     } catch (error) {
       console.error('Error fetching courses:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id]);
 
-  const fetchCourseAttendance = async () => {
+  const fetchCourseAttendance = useCallback(async () => {
+    if (!selectedCourse) return;
     try {
       const response = await axios.get(`/api/attendance/course/${selectedCourse}`);
       setAttendanceData(response.data);
     } catch (error) {
       console.error('Error fetching course attendance:', error);
     }
-  };
+  }, [selectedCourse]);
 
-  const fetchEnrolledStudents = async () => {
+  const fetchEnrolledStudents = useCallback(async () => {
+    if (!selectedCourse) return;
     try {
       const response = await axios.get(`/api/enrollments/course/${selectedCourse}`);
       const students = response.data.map(enrollment => ({
@@ -88,7 +75,22 @@ const AttendanceView = () => {
     } catch (error) {
       console.error('Error fetching students:', error);
     }
-  };
+  }, [selectedCourse]);
+
+  useEffect(() => {
+    if (user?.role === 'student') {
+      fetchStudentAttendance();
+    } else if (user?.role) {
+      fetchInstructorCourses();
+    }
+  }, [user?.role, fetchStudentAttendance, fetchInstructorCourses]);
+
+  useEffect(() => {
+    if (selectedCourse && user?.role !== 'student') {
+      fetchCourseAttendance();
+      fetchEnrolledStudents();
+    }
+  }, [selectedCourse, user?.role, fetchCourseAttendance, fetchEnrolledStudents]);
 
   const handleStudentStatusChange = (studentId, status) => {
     setAttendanceForm(prev => ({
@@ -168,7 +170,7 @@ const AttendanceView = () => {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
         <p className="mt-2 text-gray-600">
-          {user?.role === 'student' 
+          {user?.role === 'student'
             ? 'View your attendance records across all courses'
             : 'Mark and track student attendance for your courses'
           }
@@ -207,11 +209,10 @@ const AttendanceView = () => {
                 {/* Progress Bar */}
                 <div className="mb-6">
                   <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div 
-                      className={`h-3 rounded-full ${
-                        courseData.attendance.attendancePercentage >= 75 ? 'bg-green-500' :
+                    <div
+                      className={`h-3 rounded-full ${courseData.attendance.attendancePercentage >= 75 ? 'bg-green-500' :
                         courseData.attendance.attendancePercentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}
+                        }`}
                       style={{ width: `${courseData.attendance.attendancePercentage}%` }}
                     ></div>
                   </div>
@@ -249,7 +250,7 @@ const AttendanceView = () => {
           {/* Course Selection and Mark Attendance */}
           <div className="card">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Mark Attendance</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Course</label>
@@ -356,7 +357,7 @@ const AttendanceView = () => {
           {selectedCourse && attendanceData.length > 0 && (
             <div className="card">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Attendance History</h2>
-              
+
               <div className="space-y-4">
                 {attendanceData.map((record) => {
                   const stats = record.getAttendanceStats ? record.getAttendanceStats() : {
@@ -387,7 +388,7 @@ const AttendanceView = () => {
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-4 gap-4 text-sm">
                         <div className="text-center">
                           <p className="font-medium text-green-600">{stats.present}</p>

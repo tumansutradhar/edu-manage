@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { 
@@ -16,21 +16,8 @@ const GradeView = () => {
   const [selectedCourse, setSelectedCourse] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user?.role === 'student') {
-      fetchStudentGrades();
-    } else {
-      fetchInstructorCourses();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (selectedCourse && user?.role !== 'student') {
-      fetchCourseGrades();
-    }
-  }, [selectedCourse]);
-
-  const fetchStudentGrades = async () => {
+  const fetchStudentGrades = useCallback(async () => {
+    if (!user?._id) return;
     try {
       const response = await axios.get(`/api/grades/student/${user._id}`);
       setGrades(response.data);
@@ -39,30 +26,46 @@ const GradeView = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id]);
 
-  const fetchInstructorCourses = async () => {
+  const fetchInstructorCourses = useCallback(async () => {
+    if (!user?._id) return;
     try {
       const response = await axios.get(`/api/courses/instructor/${user._id}`);
       setCourses(response.data);
       if (response.data.length > 0) {
-        setSelectedCourse(response.data[0]._id);
+        setSelectedCourse(response.data._id);
       }
     } catch (error) {
       console.error('Error fetching courses:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id]);
 
-  const fetchCourseGrades = async () => {
+  const fetchCourseGrades = useCallback(async () => {
+    if (!selectedCourse) return;
     try {
       const response = await axios.get(`/api/grades/course/${selectedCourse}`);
       setGrades(response.data);
     } catch (error) {
       console.error('Error fetching course grades:', error);
     }
-  };
+  }, [selectedCourse]);
+
+  useEffect(() => {
+    if (user?.role === 'student') {
+      fetchStudentGrades();
+    } else if (user?.role) {
+      fetchInstructorCourses();
+    }
+  }, [user?.role, fetchStudentGrades, fetchInstructorCourses]);
+
+  useEffect(() => {
+    if (selectedCourse && user?.role !== 'student') {
+      fetchCourseGrades();
+    }
+  }, [selectedCourse, user?.role, fetchCourseGrades]);
 
   const calculateGPA = (grades) => {
     if (grades.length === 0) return 0;
@@ -71,7 +74,7 @@ const GradeView = () => {
     return totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : 0;
   };
 
-  const getGradeColor = (percentage) => {
+  const getThemeColor = (percentage) => {
     if (percentage >= 90) return 'text-green-600 bg-green-100';
     if (percentage >= 80) return 'text-blue-600 bg-blue-100';
     if (percentage >= 70) return 'text-yellow-600 bg-yellow-100';
@@ -166,7 +169,7 @@ const GradeView = () => {
                       <p className="text-sm text-gray-600">{grade.course?.courseCode || 'N/A'}</p>
                     </div>
                     <div className="text-right">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getGradeColor(grade.percentage || 0)}`}>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getThemeColor(grade.percentage || 0)}`}>
                         {grade.letterGrade || 'N/A'}
                       </span>
                       <p className="text-sm text-gray-600 mt-1">{(grade.percentage || 0).toFixed(1)}%</p>
@@ -223,7 +226,7 @@ const GradeView = () => {
                           <div className="text-sm text-gray-500">{grade.student?.email}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 rounded-full text-sm font-medium ${getGradeColor(grade.percentage)}`}>
+                          <span className={`px-2 py-1 rounded-full text-sm font-medium ${getThemeColor(grade.percentage)}`}>
                             {grade.letterGrade}
                           </span>
                         </td>

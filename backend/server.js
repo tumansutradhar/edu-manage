@@ -7,6 +7,15 @@ const path = require('path');
 // Load environment variables
 dotenv.config();
 
+// Basic startup guard for required env vars
+if (!process.env.MONGODB_URI) {
+  console.error('\nERROR: Missing required environment variable: MONGODB_URI');
+  console.error('Create a backend/.env file or set MONGODB_URI in your environment.');
+  console.error('See backend/.env.example for the expected variables.\n');
+  // Exit with non-zero code so process managers know startup failed
+  process.exit(1);
+}
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
@@ -77,7 +86,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
   .then(() => {
     console.log('Connected to MongoDB');
-    console.log('Database URI:', process.env.MONGODB_URI);
+    // Do not print connection strings or secrets in logs.
+    // If you need to inspect the URI, check your environment or .env file locally.
 
     // Start server
     const PORT = process.env.PORT || 5000;

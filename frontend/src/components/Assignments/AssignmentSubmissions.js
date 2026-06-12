@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import LoadingSpinner from '../Common/LoadingSpinner';
@@ -15,17 +15,17 @@ function GradeForm({ submissionId, assignmentTotalPoints, onGraded }) {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
       await axios.put(`/api/submissions/${submissionId}/grade`, {
         points: Number(points),
         feedback
       });
-      
+
       // Reset form
       setPoints('');
       setFeedback('');
-      
+
       if (onGraded) onGraded();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to grade submission');
@@ -54,7 +54,7 @@ function GradeForm({ submissionId, assignmentTotalPoints, onGraded }) {
             <span className="text-sm text-gray-500">/ {assignmentTotalPoints || 100}</span>
           </div>
         </div>
-        
+
         <div className="flex-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">Feedback (Optional)</label>
           <textarea
@@ -66,16 +66,16 @@ function GradeForm({ submissionId, assignmentTotalPoints, onGraded }) {
             maxLength="1000"
           />
         </div>
-        
-        <button 
-          type="submit" 
-          className="btn btn-primary whitespace-nowrap" 
+
+        <button
+          type="submit"
+          className="btn btn-primary whitespace-nowrap"
           disabled={loading || !points}
         >
           {loading ? 'Grading...' : 'Submit Grade'}
         </button>
       </div>
-      
+
       {error && (
         <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
           {error}
@@ -92,11 +92,7 @@ const AssignmentSubmissions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, [id]);
-
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -107,7 +103,11 @@ const AssignmentSubmissions = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, [fetchSubmissions]);
 
   const getStatusBadge = (status) => {
     const baseClasses = "px-2 py-1 text-xs font-medium rounded-full";
@@ -131,14 +131,14 @@ const AssignmentSubmissions = () => {
   };
 
   if (loading) return <LoadingSpinner />;
-  
+
   if (error) {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="text-center py-12">
           <div className="text-red-600 mb-4">{error}</div>
-          <button 
-            onClick={() => navigate(-1)} 
+          <button
+            onClick={() => navigate(-1)}
             className="btn btn-secondary"
           >
             Go Back
@@ -166,8 +166,8 @@ const AssignmentSubmissions = () => {
             </div>
           )}
         </div>
-        <button 
-          className="btn btn-secondary" 
+        <button
+          className="btn btn-secondary"
           onClick={() => navigate(-1)}
         >
           Back
@@ -235,7 +235,7 @@ const AssignmentSubmissions = () => {
                       {formatDateTime(submission.submittedAt)}
                     </div>
                   </div>
-                  
+
                   {submission.grade && (
                     <div>
                       <span className="text-sm font-medium text-gray-700">Grade:</span>
@@ -269,16 +269,16 @@ const AssignmentSubmissions = () => {
                           <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                           </svg>
-                          <a 
-                            href={`/api/submissions/download/${file.filename}`} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
+                          <a
+                            href={`/api/submissions/download/${file.filename}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 hover:underline"
                           >
                             {file.originalName}
                           </a>
                           <span className="text-gray-400">
-                            ({(file.size / 1024).toFixed(1)} KB)
+                            (({(file.size / 1024).toFixed(1)} KB))
                           </span>
                         </div>
                       ))}
@@ -312,10 +312,10 @@ const AssignmentSubmissions = () => {
                   </div>
                 ) : (
                   <div className="pt-4 border-t border-gray-200">
-                    <GradeForm 
-                      submissionId={submission._id} 
-                      assignmentTotalPoints={assignment?.totalPoints} 
-                      onGraded={fetchSubmissions} 
+                    <GradeForm
+                      submissionId={submission._id}
+                      assignmentTotalPoints={assignment?.totalPoints}
+                      onGraded={fetchSubmissions}
                     />
                   </div>
                 )}

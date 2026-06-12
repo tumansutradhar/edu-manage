@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // Added useCallback here
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
@@ -17,11 +17,23 @@ const StudentDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  const calculateAverageGrade = useCallback(() => {
+    const grades = dashboardData?.grades || [];
+    if (grades.length === 0) return 'N/A';
+    const avg = grades.reduce((sum, grade) => sum + (grade.percentage || 0), 0) / grades.length;
+    return `${avg.toFixed(1)}%`;
+  }, [dashboardData?.grades]);
 
-  const fetchDashboardData = async () => {
+  const calculateAttendanceRate = useCallback(() => {
+    const enrollments = dashboardData?.enrollments || [];
+    if (enrollments.length === 0) return 'N/A';
+    const avg = enrollments.reduce((sum, enrollment) => 
+      sum + (enrollment.attendance?.attendancePercentage || 0), 0) / enrollments.length;
+    return `${avg.toFixed(1)}%`;
+  }, [dashboardData?.enrollments]);
+
+  const fetchDashboardData = useCallback(async () => {
+    if (!user?._id) return;
     try {
       const [enrollmentsRes, assignmentsRes, gradesRes] = await Promise.all([
         axios.get(`/api/enrollments/student/${user._id}`),
@@ -39,7 +51,11 @@ const StudentDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -79,21 +95,6 @@ const StudentDashboard = () => {
       href: '/attendance'
     }
   ];
-
-  function calculateAverageGrade() {
-    const grades = dashboardData?.grades || [];
-    if (grades.length === 0) return 'N/A';
-    const avg = grades.reduce((sum, grade) => sum + (grade.percentage || 0), 0) / grades.length;
-    return `${avg.toFixed(1)}%`;
-  }
-
-  function calculateAttendanceRate() {
-    const enrollments = dashboardData?.enrollments || [];
-    if (enrollments.length === 0) return 'N/A';
-    const avg = enrollments.reduce((sum, enrollment) => 
-      sum + (enrollment.attendance?.attendancePercentage || 0), 0) / enrollments.length;
-    return `${avg.toFixed(1)}%`;
-  }
 
   const upcomingDeadlines = dashboardData?.assignments
     ?.filter(assignment => assignment.dueDate && isValidDate(assignment.dueDate) && new Date(assignment.dueDate) > new Date())

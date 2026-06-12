@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import { 
+import {
   DocumentTextIcon,
   PlusIcon,
   ClockIcon,
@@ -21,24 +21,11 @@ const AssignmentList = () => {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [courses, setCourses] = useState([]);
 
-  useEffect(() => {
-    fetchAssignments();
-    if (user?.role === 'student') {
-      fetchEnrolledCourses();
-    } else {
-      fetchInstructorCourses();
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchAssignments();
-  }, [selectedCourse, selectedStatus]);
-
-  const fetchAssignments = async () => {
+  const fetchAssignments = useCallback(async () => {
     try {
       setLoading(true);
       let url = '/api/assignments';
-      
+
       if (selectedCourse) {
         url = `/api/assignments/course/${selectedCourse}`;
       }
@@ -50,31 +37,45 @@ const AssignmentList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCourse]);
 
-  const fetchEnrolledCourses = async () => {
+  const fetchEnrolledCourses = useCallback(async () => {
+    if (!user?._id) return;
     try {
       const response = await axios.get(`/api/enrollments/student/${user._id}`);
       setCourses(response.data.map(enrollment => enrollment.course));
     } catch (error) {
       console.error('Error fetching courses:', error);
     }
-  };
+  }, [user?._id]);
 
-  const fetchInstructorCourses = async () => {
+  const fetchInstructorCourses = useCallback(async () => {
+    if (!user?._id) return;
     try {
       const response = await axios.get(`/api/courses/instructor/${user._id}`);
       setCourses(response.data);
     } catch (error) {
       console.error('Error fetching courses:', error);
     }
-  };
+  }, [user?._id]);
+
+  useEffect(() => {
+    if (user?.role === 'student') {
+      fetchEnrolledCourses();
+    } else if (user?.role) {
+      fetchInstructorCourses();
+    }
+  }, [user?.role, fetchEnrolledCourses, fetchInstructorCourses]);
+
+  useEffect(() => {
+    fetchAssignments();
+  }, [fetchAssignments, selectedCourse, selectedStatus]);
 
   const formatDueDate = (dueDate) => {
     if (!dueDate) return 'No due date';
-    
+
     if (!isValidDate(dueDate)) return 'Invalid date';
-    
+
     return formatDateTime(dueDate);
   };
 
@@ -84,12 +85,12 @@ const AssignmentList = () => {
 
   const getStatusIcon = (assignment) => {
     if (!assignment.dueDate) return <ClockIcon className="h-5 w-5 text-gray-500" />;
-    
+
     const dueDate = new Date(assignment.dueDate);
     if (isNaN(dueDate.getTime())) return <ClockIcon className="h-5 w-5 text-gray-500" />;
-    
+
     const now = new Date();
-    
+
     if (assignment.isSubmitted) {
       return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
     } else if (dueDate < now) {
@@ -102,7 +103,7 @@ const AssignmentList = () => {
   const getStatusText = (assignment) => {
     const dueDate = new Date(assignment.dueDate);
     const now = new Date();
-    
+
     if (assignment.isSubmitted) {
       return 'Submitted';
     } else if (dueDate < now) {
@@ -115,7 +116,7 @@ const AssignmentList = () => {
   const getStatusColor = (assignment) => {
     const dueDate = new Date(assignment.dueDate);
     const now = new Date();
-    
+
     if (assignment.isSubmitted) {
       return 'text-green-600';
     } else if (dueDate < now) {
@@ -136,14 +137,14 @@ const AssignmentList = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Assignments</h1>
           <p className="mt-2 text-gray-600">
-            {user?.role === 'student' 
+            {user?.role === 'student'
               ? 'View and submit your assignments'
               : 'Manage course assignments and submissions'
             }
           </p>
         </div>
-        
-        {user?.role === 'instructor' && ( // Removed admin from create assignment button
+
+        {user?.role === 'instructor' && (
           <Link
             to="/create-assignment"
             className="mt-4 sm:mt-0 btn btn-primary flex items-center"
@@ -214,7 +215,7 @@ const AssignmentList = () => {
           <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No assignments found</h3>
           <p className="text-gray-600">
-            {user?.role === 'student' 
+            {user?.role === 'student'
               ? 'No assignments available for your enrolled courses'
               : 'Create your first assignment to get started'
             }
@@ -269,8 +270,8 @@ const AssignmentList = () => {
                   >
                     View Details
                   </Link>
-                  
-                  {user?.role === 'instructor' && assignment.instructor === user._id && (
+
+                  {user?.role === 'instructor' && String(assignment.instructor?._id || assignment.instructor) === String(user._id) && (
                     <Link
                       to={`/assignments/${assignment._id}/submissions`}
                       className="btn btn-secondary"

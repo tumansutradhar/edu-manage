@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const Submission = require('../models/Submission');
 const Assignment = require('../models/Assignment');
+const Grade = require('../models/Grade');
 const { auth, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -133,7 +134,9 @@ router.post('/submit', [
 // @access  Private (Instructor only)
 router.get('/assignment/:assignmentId', [auth, authorize('instructor', 'admin')], async (req, res) => {
   try {
-    const assignment = await Assignment.findById(req.params.assignmentId);
+    const assignment = await Assignment.findById(req.params.assignmentId)
+      .populate('course', 'title courseCode')
+      .populate('instructor', 'firstName lastName email');
     if (!assignment) {
       return res.status(404).json({ message: 'Assignment not found' });
     }
@@ -142,7 +145,11 @@ router.get('/assignment/:assignmentId', [auth, authorize('instructor', 'admin')]
       .populate('student', 'firstName lastName email')
       .sort({ submittedAt: -1 });
 
-    res.json(submissions);
+    res.json({
+      assignment,
+      submissions,
+      totalSubmissions: submissions.length
+    });
   } catch (error) {
     console.error('Get submissions error:', error);
     res.status(500).json({ message: 'Server error while fetching submissions' });
@@ -195,9 +202,30 @@ router.put('/:id/grade', [
 
     await submission.save();
 
+    // Keep the separate Grade collection in sync with submission grading
+    const grade = await Grade.findOneAndUpdate(
+      {
+        student: submission.student,
+        course: submission.assignment.course
+      },
+      {
+        student: submission.student,
+        course: submission.assignment.course,
+        instructor: submission.assignment.instructor,
+        percentage,
+        isFinalized: false
+      },
+      { new: true, upsert: true, runValidators: true }
+    ).populate([
+      { path: 'student', select: 'firstName lastName email' },
+      { path: 'course', select: 'title courseCode credits' },
+      { path: 'instructor', select: 'firstName lastName' }
+    ]);
+
     res.json({
       message: 'Submission graded successfully',
-      submission
+      submission,
+      grade
     });
   } catch (error) {
     console.error('Grade submission error:', error);

@@ -121,7 +121,56 @@ router.get('/student/:studentId', auth, async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    res.json([]);
+    const enrollments = await Enrollment.find({
+      student: req.params.studentId,
+      status: 'enrolled'
+    }).populate('course', 'title courseCode');
+
+    const attendanceByCourse = await Promise.all(enrollments.map(async (enrollment) => {
+      const records = await Attendance.find({
+        course: enrollment.course._id,
+        'students.student': req.params.studentId
+      })
+        .populate('course', 'title courseCode')
+        .sort({ date: -1 });
+
+      const attendedClasses = records.reduce((count, record) => {
+        const studentEntry = record.students.find(
+          item => item.student.toString() === req.params.studentId
+        );
+        return count + (studentEntry && studentEntry.status === 'present' ? 1 : 0);
+      }, 0);
+
+      const totalClasses = records.length;
+      const attendancePercentage = totalClasses > 0
+        ? (attendedClasses / totalClasses) * 100
+        : 0;
+
+      return {
+        course: enrollment.course,
+        attendance: {
+          totalClasses,
+          attendedClasses,
+          attendancePercentage
+        },
+        records: records.map(record => {
+          const studentEntry = record.students.find(
+            item => item.student.toString() === req.params.studentId
+          );
+
+          return {
+            _id: record._id,
+            date: record.date,
+            classType: record.classType,
+            topic: record.topic,
+            duration: record.duration,
+            status: studentEntry?.status || 'absent'
+          };
+        })
+      };
+    }));
+
+    res.json(attendanceByCourse);
   } catch (error) {
     console.error('Get student attendance error:', error);
     res.status(500).json({ message: 'Server error while fetching student attendance' });

@@ -35,7 +35,7 @@ const CreateCourse = () => {
   ];
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
     
     setFormData(prev => ({
       ...prev,
@@ -129,7 +129,7 @@ const CreateCourse = () => {
       
       // Auto-fill title if empty
       if (!formData.materials[index].title) {
-        updates.title = file.name.split('.')[0];
+        updates.title = file.name.split('.');
       }
       
       // Apply all updates at once
@@ -504,7 +504,7 @@ const CreateCourse = () => {
                                 className="sr-only"
                                 accept={material.type === 'video' ? 'video/*' : '.pdf,.doc,.docx,.txt,.png,.jpg,.jpeg'}
                                 onChange={(e) => {
-                                  const file = e.target.files[0];
+                                  const file = e.target.files;
                                   if (file) {
                                     updateMaterial(index, 'file', file);
                                     handleFileUpload(index, file);

@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import { 
-  BookOpenIcon, 
-  UserGroupIcon, 
-  DocumentTextIcon, 
+import {
+  BookOpenIcon,
+  UserGroupIcon,
+  DocumentTextIcon,
   ClipboardDocumentCheckIcon,
   PlusIcon,
   ExclamationTriangleIcon
@@ -19,12 +19,7 @@ const InstructorDashboard = () => {
   const [coursePerformance, setCoursePerformance] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-    fetchCoursePerformance();
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const response = await axios.get('/api/analytics/dashboard');
       setDashboardData(response.data);
@@ -33,14 +28,15 @@ const InstructorDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchCoursePerformance = async () => {
+  const fetchCoursePerformance = useCallback(async () => {
+    if (!user?._id) return;
     try {
       // First get instructor's courses
       const coursesResponse = await axios.get(`/api/courses/instructor/${user._id}`);
       const courses = coursesResponse.data;
-      
+
       // Then fetch performance data for each course
       const performancePromises = courses.map(async (course) => {
         try {
@@ -58,14 +54,19 @@ const InstructorDashboard = () => {
           };
         }
       });
-      
+
       const performanceData = await Promise.all(performancePromises);
       setCoursePerformance(performanceData);
-      
+
     } catch (error) {
       console.error('Error fetching course performance:', error);
     }
-  };
+  }, [user?._id]);
+
+  useEffect(() => {
+    fetchDashboardData();
+    fetchCoursePerformance();
+  }, [fetchDashboardData, fetchCoursePerformance]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -97,7 +98,7 @@ const InstructorDashboard = () => {
     },
     {
       name: 'Pending Grading',
-      value: dashboardData?.totalPendingGrading || 0, // This would come from actual data
+      value: dashboardData?.totalPendingGrading || 0,
       icon: ClipboardDocumentCheckIcon,
       color: 'text-red-600',
       bg: 'bg-red-100'
@@ -140,7 +141,7 @@ const InstructorDashboard = () => {
           <PlusIcon className="h-8 w-8 text-blue-600" />
           <span className="ml-3 font-medium text-gray-900">Create New Course</span>
         </Link>
-        
+
         <Link
           to="/create-assignment"
           className="flex items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
@@ -148,7 +149,7 @@ const InstructorDashboard = () => {
           <PlusIcon className="h-8 w-8 text-green-600" />
           <span className="ml-3 font-medium text-gray-900">Create Assignment</span>
         </Link>
-        
+
         <Link
           to="/attendance"
           className="flex items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
@@ -201,8 +202,8 @@ const InstructorDashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Course Performance</h2>
             {coursePerformance.length > 0 && (
-              <Link 
-                to={`/courses/${coursePerformance[0].courseId}/performance`}
+              <Link
+                to={`/courses/${coursePerformance.courseId}/performance`}
                 className="text-sm text-primary-600 hover:text-primary-500"
               >
                 View Details
@@ -224,8 +225,8 @@ const InstructorDashboard = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Avg Completion Rate</span>
                       <span className="font-semibold">
-                        {coursePerformance.length > 0 
-                          ? Math.round(coursePerformance.reduce((sum, course) => sum + course.completionRate, 0) / coursePerformance.length) 
+                        {coursePerformance.length > 0
+                          ? Math.round(coursePerformance.reduce((sum, course) => sum + course.completionRate, 0) / coursePerformance.length)
                           : 0}%
                       </span>
                     </div>
@@ -234,8 +235,8 @@ const InstructorDashboard = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Avg Submission Rate</span>
                       <span className="font-semibold">
-                        {coursePerformance.length > 0 
-                          ? Math.round(coursePerformance.reduce((sum, course) => sum + course.submissionRate, 0) / coursePerformance.length) 
+                        {coursePerformance.length > 0
+                          ? Math.round(coursePerformance.reduce((sum, course) => sum + course.submissionRate, 0) / coursePerformance.length)
                           : 0}%
                       </span>
                     </div>
@@ -244,8 +245,8 @@ const InstructorDashboard = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Avg Grade</span>
                       <span className="font-semibold">
-                        {coursePerformance.length > 0 
-                          ? Math.round(coursePerformance.reduce((sum, course) => sum + course.averageGrade, 0) / coursePerformance.length) 
+                        {coursePerformance.length > 0
+                          ? Math.round(coursePerformance.reduce((sum, course) => sum + course.averageGrade, 0) / coursePerformance.length)
                           : 0}%
                       </span>
                     </div>
@@ -254,8 +255,8 @@ const InstructorDashboard = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Student Satisfaction</span>
                       <span className="font-semibold">
-                        {coursePerformance.length > 0 
-                          ? (coursePerformance.reduce((sum, course) => sum + course.averageSatisfaction, 0) / coursePerformance.length).toFixed(1) 
+                        {coursePerformance.length > 0
+                          ? (coursePerformance.reduce((sum, course) => sum + course.averageSatisfaction, 0) / coursePerformance.length).toFixed(1)
                           : 0}/5
                       </span>
                     </div>
