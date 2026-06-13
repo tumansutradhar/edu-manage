@@ -235,7 +235,7 @@ const InstructorVerification = () => {
                           
                           <div className="flex items-center space-x-2">
                             <a
-                              href={`http://localhost:5000/${document.path}`}
+                              href={`${axios.defaults.baseURL}/${document.path}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="btn btn-secondary btn-sm flex items-center"
