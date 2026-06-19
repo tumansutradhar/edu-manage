@@ -2,16 +2,16 @@
 
 export const formatDate = (date, options = {}) => {
   if (!date) return 'No date';
-  
+
   const dateObj = new Date(date);
   if (isNaN(dateObj.getTime())) return 'Invalid date';
-  
+
   const defaultOptions = {
     year: 'numeric', // Always 4-digit year
     month: 'short',
     day: 'numeric'
   };
-  
+
   return dateObj.toLocaleDateString('en-US', { ...defaultOptions, ...options });
 };
 
@@ -38,14 +38,14 @@ export const formatDateLong = (date) => {
 
 export const getTimeUntilDate = (targetDate) => {
   if (!targetDate) return 'No date';
-  
+
   const target = new Date(targetDate);
   if (isNaN(target.getTime())) return 'Invalid date';
-  
+
   const now = new Date();
   const diffTime = target - now;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays < 0) {
     return `${Math.abs(diffDays)} days overdue`;
   } else if (diffDays === 0) {

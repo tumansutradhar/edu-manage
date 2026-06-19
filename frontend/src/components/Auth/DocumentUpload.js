@@ -34,7 +34,7 @@ const DocumentUpload = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Check required documents
     const requiredDocs = documents.filter(doc => doc.required && !doc.file);
     if (requiredDocs.length > 0) {
@@ -43,7 +43,7 @@ const DocumentUpload = () => {
     }
 
     setUploading(true);
-    
+
     try {
       const formData = new FormData();
       const documentTypes = [];
@@ -64,15 +64,15 @@ const DocumentUpload = () => {
       });
 
       toast.success('Documents uploaded successfully! Your account is now under review.');
-      
+
       // Set submitted state first for immediate UI update
       setIsSubmitted(true);
-      
+
       // Refresh user data to get updated status with a small delay
       setTimeout(async () => {
         await refreshUser();
       }, 500);
-      
+
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to upload documents');
     } finally {
@@ -88,24 +88,24 @@ const DocumentUpload = () => {
       verificationStatus: user?.instructorProfile?.verificationStatus,
       user: user?.instructorProfile
     });
-    
+
     // If just submitted in this session, show under_review
     if (isSubmitted) {
       return 'under_review';
     }
-    
+
     // If user has previously uploaded documents, check their status
     if (user?.instructorProfile?.documentsUploaded) {
       return user.instructorProfile.verificationStatus || 'under_review';
     }
-    
+
     return null;
   };
 
   // Get rejection reasons from documents or verification comments
   const getRejectionReasons = () => {
     const reasons = [];
-    
+
     // Check individual document comments
     if (user?.instructorProfile?.documents) {
       user.instructorProfile.documents.forEach(doc => {
@@ -114,12 +114,12 @@ const DocumentUpload = () => {
         }
       });
     }
-    
+
     // Check overall verification comments
     if (user?.instructorProfile?.verificationComments) {
       reasons.push(user.instructorProfile.verificationComments);
     }
-    
+
     return reasons;
   };
 
@@ -138,10 +138,10 @@ const DocumentUpload = () => {
   const handleReupload = async () => {
     try {
       setUploading(true);
-      
+
       // Call backend to reset document status
       await axios.put('/api/users/reset-documents');
-      
+
       // Reset local state
       setIsSubmitted(false);
       setDocuments([
@@ -150,10 +150,10 @@ const DocumentUpload = () => {
         { type: 'id_proof', file: null, required: true, label: 'ID Proof' },
         { type: 'experience_letter', file: null, required: false, label: 'Experience Letter' }
       ]);
-      
+
       // Refresh user data
       await refreshUser();
-      
+
       toast.success('Ready for new document upload. Please select your documents.');
     } catch (error) {
       console.error('Error resetting documents:', error);
@@ -200,7 +200,7 @@ const DocumentUpload = () => {
             <p className="mt-4 text-gray-600">
               {statusMessage}
             </p>
-            
+
             {/* Show rejection reasons */}
             {documentStatus === 'rejected' && rejectionReasons.length > 0 && (
               <div className="mt-6 text-left">
@@ -217,7 +217,7 @@ const DocumentUpload = () => {
                 </div>
               </div>
             )}
-            
+
             <div className="mt-8 space-y-4">
               {documentStatus === 'rejected' && (
                 <button
@@ -271,7 +271,7 @@ const DocumentUpload = () => {
                     <CheckCircleIcon className="h-5 w-5 text-green-500" />
                   )}
                 </div>
-                
+
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                   <input
                     type="file"

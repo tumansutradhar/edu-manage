@@ -125,8 +125,8 @@ router.get('/pending-approval', [auth, authorize('admin')], async (req, res) => 
       role: { $ne: 'student' },
       isActive: true
     })
-    .select('-password')
-    .sort({ createdAt: -1 });
+      .select('-password')
+      .sort({ createdAt: -1 });
 
     res.json(pendingUsers);
   } catch (error) {
@@ -141,7 +141,7 @@ router.get('/pending-approval', [auth, authorize('admin')], async (req, res) => 
 router.get('/:id/profile', [auth, authorize('admin')], async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -159,7 +159,7 @@ router.get('/:id/profile', [auth, authorize('admin')], async (req, res) => {
 router.put('/:id/verify-document/:documentId', [auth, authorize('admin')], async (req, res) => {
   try {
     const { verified, comments } = req.body;
-    
+
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -179,7 +179,7 @@ router.put('/:id/verify-document/:documentId', [auth, authorize('admin')], async
 
     // Check if all documents are verified
     const allDocumentsVerified = user.instructorProfile.documents.every(doc => doc.verified);
-    
+
     if (allDocumentsVerified && user.instructorProfile.documents.length > 0) {
       // Auto-approve user if all documents are verified
       user.isApproved = true;
@@ -199,12 +199,12 @@ router.put('/:id/verify-document/:documentId', [auth, authorize('admin')], async
     } else if (!verified) {
       // If document was rejected, update verification status
       user.instructorProfile.verificationStatus = 'rejected';
-      
+
       // Add overall verification comments if not already present
       if (comments && !user.instructorProfile.verificationComments) {
         user.instructorProfile.verificationComments = comments;
       }
-      
+
       await user.save();
 
       // Notify instructor of rejection
@@ -244,8 +244,8 @@ router.get('/pending-verification', [auth, authorize('admin')], async (req, res)
         { 'instructorProfile.documents': { $elemMatch: { verified: false } } }
       ]
     })
-    .select('-password')
-    .sort({ createdAt: -1 });
+      .select('-password')
+      .sort({ createdAt: -1 });
 
     res.json(pendingInstructors);
   } catch (error) {
@@ -271,7 +271,7 @@ router.put('/reset-documents', [auth, authorize('instructor')], async (req, res)
       user.instructorProfile.verificationStatus = 'pending';
       user.instructorProfile.verificationComments = '';
       user.isApproved = false;
-      
+
       await user.save();
     }
 

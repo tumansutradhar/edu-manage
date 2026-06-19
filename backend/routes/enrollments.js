@@ -25,9 +25,9 @@ router.post('/', [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.log('Validation errors:', errors.array()); // Debug log
-      return res.status(400).json({ 
-        message: 'Validation errors', 
-        errors: errors.array() 
+      return res.status(400).json({
+        message: 'Validation errors',
+        errors: errors.array()
       });
     }
 
@@ -108,15 +108,15 @@ router.get('/student/:studentId', auth, async (req, res) => {
     const enrollments = await Enrollment.find({
       student: req.params.studentId
     })
-    .populate('course', 'title courseCode instructor credits fees')
-    .populate({
-      path: 'course',
-      populate: {
-        path: 'instructor',
-        select: 'firstName lastName'
-      }
-    })
-    .sort({ enrollmentDate: -1 });
+      .populate('course', 'title courseCode instructor credits fees')
+      .populate({
+        path: 'course',
+        populate: {
+          path: 'instructor',
+          select: 'firstName lastName'
+        }
+      })
+      .sort({ enrollmentDate: -1 });
 
     res.json(enrollments);
   } catch (error) {
@@ -131,7 +131,7 @@ router.get('/student/:studentId', auth, async (req, res) => {
 router.get('/course/:courseId', [auth, authorize('instructor', 'admin')], async (req, res) => {
   try {
     const course = await Course.findById(req.params.courseId);
-    
+
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
@@ -144,8 +144,8 @@ router.get('/course/:courseId', [auth, authorize('instructor', 'admin')], async 
     const enrollments = await Enrollment.find({
       course: req.params.courseId
     })
-    .populate('student', 'firstName lastName email profileImage')
-    .sort({ enrollmentDate: -1 });
+      .populate('student', 'firstName lastName email profileImage')
+      .sort({ enrollmentDate: -1 });
 
     res.json(enrollments);
   } catch (error) {
@@ -160,7 +160,7 @@ router.get('/course/:courseId', [auth, authorize('instructor', 'admin')], async 
 router.delete('/:id', auth, async (req, res) => {
   try {
     const enrollment = await Enrollment.findById(req.params.id);
-    
+
     if (!enrollment) {
       return res.status(404).json({ message: 'Enrollment not found' });
     }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import { 
+import {
   ChartBarIcon,
   TrophyIcon,
   BookOpenIcon,
@@ -91,7 +91,7 @@ const GradeView = () => {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Grades</h1>
         <p className="mt-2 text-gray-600">
-          {user?.role === 'student' 
+          {user?.role === 'student'
             ? 'View your academic performance and grades'
             : 'Manage and track student grades for your courses'
           }
@@ -129,7 +129,7 @@ const GradeView = () => {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Avg Grade</p>
                   <p className="text-2xl font-semibold text-gray-900">
-                    {grades.length > 0 
+                    {grades.length > 0
                       ? (grades.reduce((sum, g) => sum + (g.percentage || 0), 0) / grades.length).toFixed(1) + '%'
                       : 'N/A'
                     }
@@ -234,9 +234,8 @@ const GradeView = () => {
                           {grade.percentage.toFixed(1)}%
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            grade.isFinalized ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          <span className={`px-2 py-1 rounded-full text-xs ${grade.isFinalized ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                            }`}>
                             {grade.isFinalized ? 'Finalized' : 'Draft'}
                           </span>
                         </td>

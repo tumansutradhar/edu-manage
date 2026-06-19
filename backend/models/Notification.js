@@ -52,7 +52,7 @@ notificationSchema.index({ recipient: 1 });
 notificationSchema.index({ isRead: 1 });
 
 // Static method to create notification
-notificationSchema.statics.createNotification = async function(data) {
+notificationSchema.statics.createNotification = async function (data) {
   try {
     const notification = new this(data);
     await notification.save();
@@ -64,13 +64,13 @@ notificationSchema.statics.createNotification = async function(data) {
 };
 
 // Static method to notify all admins
-notificationSchema.statics.notifyAdmins = async function(title, message, type = 'system', relatedData = {}) {
+notificationSchema.statics.notifyAdmins = async function (title, message, type = 'system', relatedData = {}) {
   try {
     const User = require('./User');
     const admins = await User.find({ role: 'admin', isActive: true });
-    
+
     const notifications = await Promise.all(
-      admins.map(admin => 
+      admins.map(admin =>
         this.createNotification({
           recipient: admin._id,
           title,
@@ -80,7 +80,7 @@ notificationSchema.statics.notifyAdmins = async function(title, message, type = 
         })
       )
     );
-    
+
     return notifications;
   } catch (error) {
     console.error('Error notifying admins:', error);

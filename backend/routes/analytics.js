@@ -90,29 +90,29 @@ router.get('/dashboard', [auth, authorize('admin', 'instructor')], async (req, r
 router.get('/public', async (req, res) => {
   try {
     const Grade = require('../models/Grade');
-    
+
     // Get basic platform stats
     const totalStudents = await User.countDocuments({ role: 'student', isActive: true });
     const activeCourses = await Course.countDocuments({ isActive: true, isApproved: true });
     const totalEnrollments = await Enrollment.countDocuments({ status: 'enrolled' });
-    
+
     // Calculate average satisfaction based on multiple factors
     const grades = await Grade.find({ isFinalized: true });
     let satisfactionRate = 95; // Default fallback
-    
+
     if (grades.length > 0) {
       const avgGrade = grades.reduce((sum, grade) => sum + grade.percentage, 0) / grades.length;
-      
+
       // More realistic calculation based on grade distribution
       const excellentGrades = grades.filter(g => g.percentage >= 90).length;
       const goodGrades = grades.filter(g => g.percentage >= 80 && g.percentage < 90).length;
       const averageGrades = grades.filter(g => g.percentage >= 70 && g.percentage < 80).length;
       const poorGrades = grades.filter(g => g.percentage < 70).length;
-      
+
       // Calculate weighted satisfaction (excellent=5, good=4, average=3, poor=2)
       const totalWeightedScore = (excellentGrades * 5) + (goodGrades * 4) + (averageGrades * 3) + (poorGrades * 2);
       const maxPossibleScore = grades.length * 5;
-      
+
       if (maxPossibleScore > 0) {
         const satisfactionScore = (totalWeightedScore / maxPossibleScore) * 5;
         // Convert 5-point scale to percentage (3.5/5 = 70%, 4.5/5 = 90%, etc.)
@@ -120,7 +120,7 @@ router.get('/public', async (req, res) => {
         satisfactionRate = Math.min(100, Math.max(60, satisfactionRate)); // Keep between 60-100%
       }
     }
-    
+
     const stats = {
       totalStudents: Math.max(totalStudents, 1000), // Show at least 1K to look established
       activeCourses: Math.max(activeCourses, 100), // Show at least 100 to look comprehensive

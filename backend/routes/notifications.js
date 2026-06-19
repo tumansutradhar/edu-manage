@@ -9,12 +9,12 @@ const router = express.Router();
 // @access  Private
 router.get('/', auth, async (req, res) => {
   try {
-    const notifications = await Notification.find({ 
+    const notifications = await Notification.find({
       recipient: req.user._id,
-      isDeleted: false 
+      isDeleted: false
     })
-    .sort({ createdAt: -1 })
-    .limit(50);
+      .sort({ createdAt: -1 })
+      .limit(50);
 
     const unreadCount = await Notification.countDocuments({
       recipient: req.user._id,
@@ -38,7 +38,7 @@ router.get('/', auth, async (req, res) => {
 router.put('/:id/read', auth, async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);
-    
+
     if (!notification) {
       return res.status(404).json({ message: 'Notification not found' });
     }

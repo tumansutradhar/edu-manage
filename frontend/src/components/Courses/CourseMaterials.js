@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import { 
+import {
   DocumentIcon,
   PlayIcon,
   LinkIcon,
@@ -50,7 +50,7 @@ const CourseMaterials = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       if (editingMaterial) {
         await axios.put(`/api/courses/${id}/material/${editingMaterial._id}`, formData);
@@ -59,7 +59,7 @@ const CourseMaterials = () => {
         await axios.post(`/api/courses/${id}/material`, formData);
         toast.success('Material added successfully');
       }
-      
+
       fetchCourse();
       resetForm();
     } catch (error) {
@@ -70,7 +70,7 @@ const CourseMaterials = () => {
 
   const handleDelete = async (materialId) => {
     if (!window.confirm('Are you sure you want to delete this material?')) return;
-    
+
     try {
       await axios.delete(`/api/courses/${id}/material/${materialId}`);
       toast.success('Material deleted successfully');
@@ -263,7 +263,7 @@ const CourseMaterials = () => {
       {/* Materials List */}
       <div className="card">
         <h2 className="text-lg font-semibold mb-4">Materials ({course.materials?.length || 0})</h2>
-        
+
         {!course.materials?.length ? (
           <div className="text-center py-8 text-gray-500">
             No materials uploaded yet
@@ -297,7 +297,7 @@ const CourseMaterials = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <a
                       href={material.url}

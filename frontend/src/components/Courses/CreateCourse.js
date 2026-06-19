@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  PlusIcon, 
-  TrashIcon, 
+import {
+  PlusIcon,
+  TrashIcon,
   DocumentIcon,
   LockClosedIcon,
   LockOpenIcon,
@@ -30,13 +30,13 @@ const CreateCourse = () => {
   const [uploadingFiles, setUploadingFiles] = useState([]);
 
   const categories = [
-    'Computer Science', 'Mathematics', 'Physics', 'Chemistry', 
+    'Computer Science', 'Mathematics', 'Physics', 'Chemistry',
     'Biology', 'English', 'History', 'Arts', 'Business', 'Other'
   ];
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'number' ? parseInt(value) || 0 : value
@@ -85,7 +85,7 @@ const CreateCourse = () => {
     const newMaterials = [...formData.materials];
     newMaterials[index] = { ...newMaterials[index], [field]: value };
     setFormData(prev => ({ ...prev, materials: newMaterials }));
-    
+
     // Log the update for debugging
     console.log(`Updated material ${index} field ${field} to:`, value);
     console.log('Full material after update:', newMaterials[index]);
@@ -93,7 +93,7 @@ const CreateCourse = () => {
 
   const handleFileUpload = async (index, file) => {
     if (!file) return;
-    
+
     // Validate file size (max 100MB)
     if (file.size > 100 * 1024 * 1024) {
       toast.error('File size must be less than 100MB');
@@ -102,7 +102,7 @@ const CreateCourse = () => {
 
     try {
       setUploadingFiles(prev => [...prev, index]);
-      
+
       const uploadFormData = new FormData();
       uploadFormData.append('file', file);
       uploadFormData.append('type', 'course-material');
@@ -120,31 +120,31 @@ const CreateCourse = () => {
       // Update material with the uploaded file URL
       const fileUrl = response.data.url || response.data.filePath;
       console.log('Using URL:', fileUrl);
-      
+
       // Update material with all the file information at once
       const updates = {
         url: fileUrl,
         filename: response.data.filename
       };
-      
+
       // Auto-fill title if empty
       if (!formData.materials[index].title) {
         updates.title = file.name.split('.');
       }
-      
+
       // Apply all updates at once
       const newMaterials = [...formData.materials];
       newMaterials[index] = { ...newMaterials[index], ...updates };
       setFormData(prev => ({ ...prev, materials: newMaterials }));
-      
+
       console.log('Material updated with all data:', newMaterials[index]);
-      
+
       // Wait a moment and check if the state was updated
       setTimeout(() => {
         console.log('State check after upload - material', index + 1, ':', formData.materials[index]);
         console.log('URL in state:', formData.materials[index]?.url);
       }, 100);
-      
+
       toast.success('File uploaded successfully');
       console.log('Material should now have URL:', fileUrl);
     } catch (error) {
@@ -164,7 +164,7 @@ const CreateCourse = () => {
       for (let i = 0; i < formData.materials.length; i++) {
         const material = formData.materials[i];
         console.log(`Validating material ${i + 1}:`, material);
-        
+
         if (!material.title.trim()) {
           toast.error(`Material ${i + 1}: Title is required`);
           setLoading(false);
@@ -208,9 +208,9 @@ const CreateCourse = () => {
       };
 
       const response = await axios.post('/api/courses', cleanedData);
-      
+
       toast.success('Course created successfully! Pending admin approval.');
-      
+
       navigate(`/courses/${response.data.course._id}`);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create course');
@@ -232,7 +232,7 @@ const CreateCourse = () => {
         {/* Basic Information */}
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -375,7 +375,7 @@ const CreateCourse = () => {
               Add
             </button>
           </div>
-          
+
           <div className="space-y-3">
             {formData.prerequisites.map((prereq, index) => (
               <div key={index} className="flex items-center space-x-3">
@@ -402,16 +402,16 @@ const CreateCourse = () => {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Course Materials</h2>
-              <button
-                type="button"
-                onClick={addMaterial}
-                className="btn btn-secondary btn-sm flex items-center"
-              >
-                <PlusIcon className="h-4 w-4 mr-1" />
-                Add Material
-              </button>
-            </div>
-          
+            <button
+              type="button"
+              onClick={addMaterial}
+              className="btn btn-secondary btn-sm flex items-center"
+            >
+              <PlusIcon className="h-4 w-4 mr-1" />
+              Add Material
+            </button>
+          </div>
+
           <div className="space-y-6">
             {formData.materials.map((material, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
@@ -425,7 +425,7 @@ const CreateCourse = () => {
                     <TrashIcon className="h-4 w-4" />
                   </button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Title */}
                   <div>
@@ -571,7 +571,7 @@ const CreateCourse = () => {
                 </div>
               </div>
             ))}
-            
+
             {formData.materials.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <DocumentIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />

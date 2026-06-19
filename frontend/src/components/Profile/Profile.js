@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { 
+import {
   UserCircleIcon,
   KeyIcon,
   CameraIcon
@@ -52,7 +52,7 @@ const Profile = () => {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       // This would normally call an API to update profile
       toast.success('Profile updated successfully!');
@@ -65,14 +65,14 @@ const Profile = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast.error('New passwords do not match');
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       // This would normally call an API to change password
       toast.success('Password changed successfully!');
@@ -104,9 +104,9 @@ const Profile = () => {
           <div className="relative">
             <div className="h-24 w-24 bg-gray-300 rounded-full flex items-center justify-center">
               {user?.profileImage ? (
-                <img 
-                  src={user.profileImage} 
-                  alt="Profile" 
+                <img
+                  src={user.profileImage}
+                  alt="Profile"
                   className="h-24 w-24 rounded-full object-cover"
                 />
               ) : (
@@ -117,7 +117,7 @@ const Profile = () => {
               <CameraIcon className="h-4 w-4" />
             </button>
           </div>
-          
+
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
               {user?.firstName} {user?.lastName}
@@ -134,21 +134,19 @@ const Profile = () => {
           <nav className="-mb-px flex space-x-8">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'profile'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'profile'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
             >
               Profile Information
             </button>
             <button
               onClick={() => setActiveTab('password')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'password'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'password'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
             >
               Change Password
             </button>

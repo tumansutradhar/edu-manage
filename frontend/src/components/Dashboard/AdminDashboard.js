@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  UserGroupIcon, 
-  BookOpenIcon, 
-  ChartBarIcon, 
+import {
+  UserGroupIcon,
+  BookOpenIcon,
+  ChartBarIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   ClockIcon
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="card">
           <div className="flex items-center">
             <ChartBarIcon className="h-8 w-8 text-blue-500" />
@@ -97,7 +97,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="card">
           <div className="flex items-center">
             <ExclamationTriangleIcon className="h-8 w-8 text-yellow-500" />

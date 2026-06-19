@@ -25,13 +25,13 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  
+
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'role') {
       setShowInstructorFields(value === 'instructor');
       setFormData({
@@ -53,7 +53,7 @@ const Register = () => {
         [name]: value
       });
     }
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
@@ -62,29 +62,29 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
-    
+
     const { confirmPassword, ...registerData } = formData;
     const result = await register(registerData);
-    
+
     if (result.success) {
       if (result.needsDocuments) {
         // Redirect to document upload for instructors
@@ -93,7 +93,7 @@ const Register = () => {
         navigate('/dashboard');
       }
     }
-    
+
     setIsLoading(false);
   };
 
@@ -192,7 +192,7 @@ const Register = () => {
         {showInstructorFields && (
           <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
             <h3 className="text-lg font-medium text-gray-900">Instructor Information</h3>
-            
+
             <div>
               <label htmlFor="qualification" className="block text-sm font-medium text-gray-700">
                 Highest Qualification *
@@ -278,7 +278,7 @@ const Register = () => {
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
               <p className="text-sm text-yellow-800">
-                <strong>Next Step:</strong> After registration, you'll need to upload documents 
+                <strong>Next Step:</strong> After registration, you'll need to upload documents
                 (degree certificates, ID proof, etc.) for verification before your account is approved.
               </p>
             </div>

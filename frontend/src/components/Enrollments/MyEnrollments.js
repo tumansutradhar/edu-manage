@@ -112,7 +112,7 @@ const MyEnrollments = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Avg Attendance</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {enrollments.length > 0 
+                {enrollments.length > 0
                   ? Math.round(enrollments.reduce((sum, e) => sum + (e.attendance?.attendancePercentage || 0), 0) / enrollments.length)
                   : 0}%
               </p>
@@ -151,7 +151,7 @@ const MyEnrollments = () => {
                   {enrollment.course.title}
                 </h3>
                 <p className="text-sm text-gray-600 mb-2">{enrollment.course.courseCode}</p>
-                
+
                 <div className="flex items-center text-sm text-gray-600">
                   <UserIcon className="h-4 w-4 mr-1" />
                   {enrollment.course.instructor?.firstName} {enrollment.course.instructor?.lastName}
@@ -169,7 +169,7 @@ const MyEnrollments = () => {
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-blue-500 h-2 rounded-full"
                       style={{ width: `${enrollment.attendance.attendancePercentage}%` }}
                     ></div>
@@ -186,12 +186,8 @@ const MyEnrollments = () => {
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full ${
-                          enrollment.finalGrade.percentage >= 90 ? 'bg-green-500' :
-                          enrollment.finalGrade.percentage >= 80 ? 'bg-blue-500' :
-                          enrollment.finalGrade.percentage >= 70 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}
+                      <div
+                        className={`h-2 rounded-full ${enrollment.finalGrade.percentage >= 90 ? 'bg-green-500' : enrollment.finalGrade.percentage >= 80 ? 'bg-blue-500' : enrollment.finalGrade.percentage >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`}
                         style={{ width: `${enrollment.finalGrade.percentage}%` }}
                       ></div>
                     </div>

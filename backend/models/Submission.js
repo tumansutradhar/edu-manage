@@ -73,7 +73,7 @@ submissionSchema.index({ assignment: 1 });
 submissionSchema.index({ status: 1 });
 
 // Calculate letter grade based on percentage
-submissionSchema.pre('save', function(next) {
+submissionSchema.pre('save', function (next) {
   if (this.grade && this.grade.percentage !== undefined) {
     const percentage = this.grade.percentage;
     if (percentage >= 97) this.grade.letterGrade = 'A+';

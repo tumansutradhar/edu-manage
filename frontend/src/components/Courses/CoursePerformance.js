@@ -88,7 +88,7 @@ const CoursePerformance = () => {
       bg: getPerformanceColorBg(performanceData.completionRate)
     },
     {
-      name: 'Submission Rate', 
+      name: 'Submission Rate',
       value: `${performanceData.submissionRate}%`,
       icon: DocumentTextIcon,
       color: getPerformanceColor(performanceData.submissionRate),
@@ -165,11 +165,10 @@ const CoursePerformance = () => {
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full ${
-                            getPerformanceColor(assignment.submissionRate) === 'text-green-600' ? 'bg-green-500' :
-                            getPerformanceColor(assignment.submissionRate) === 'text-yellow-600' ? 'bg-yellow-500' : 'bg-red-500'
-                          }`}
+                        <div
+                          className={`h-2 rounded-full ${getPerformanceColor(assignment.submissionRate) === 'text-green-600' ? 'bg-green-500' :
+                              getPerformanceColor(assignment.submissionRate) === 'text-yellow-600' ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}
                           style={{ width: `${assignment.submissionRate}%` }}
                         ></div>
                       </div>
@@ -182,11 +181,10 @@ const CoursePerformance = () => {
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full ${
-                            getPerformanceColor(assignment.averageGrade) === 'text-green-600' ? 'bg-green-500' :
-                            getPerformanceColor(assignment.averageGrade) === 'text-yellow-600' ? 'bg-yellow-500' : 'bg-red-500'
-                          }`}
+                        <div
+                          className={`h-2 rounded-full ${getPerformanceColor(assignment.averageGrade) === 'text-green-600' ? 'bg-green-500' :
+                              getPerformanceColor(assignment.averageGrade) === 'text-yellow-600' ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}
                           style={{ width: `${assignment.averageGrade}%` }}
                         ></div>
                       </div>
@@ -205,19 +203,18 @@ const CoursePerformance = () => {
             {Object.entries(performanceData.gradeDistribution).map(([grade, count]) => {
               const total = Object.values(performanceData.gradeDistribution).reduce((sum, c) => sum + c, 0);
               const percentage = total > 0 ? (count / total) * 100 : 0;
-              
+
               return (
                 <div key={grade} className="flex items-center">
                   <div className="w-8 text-sm font-medium text-gray-900">{grade}</div>
                   <div className="flex-1 mx-4">
                     <div className="w-full bg-gray-200 rounded-full h-4">
-                      <div 
-                        className={`h-4 rounded-full ${
-                          grade === 'A' ? 'bg-green-500' :
-                          grade === 'B' ? 'bg-blue-500' :
-                          grade === 'C' ? 'bg-yellow-500' :
-                          grade === 'D' ? 'bg-orange-500' : 'bg-red-500'
-                        }`}
+                      <div
+                        className={`h-4 rounded-full ${grade === 'A' ? 'bg-green-500' :
+                            grade === 'B' ? 'bg-blue-500' :
+                              grade === 'C' ? 'bg-yellow-500' :
+                                grade === 'D' ? 'bg-orange-500' : 'bg-red-500'
+                          }`}
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
@@ -269,7 +266,7 @@ const CoursePerformance = () => {
               </div>
             </div>
           )}
-          
+
           {performanceData.submissionRate < 70 && (
             <div className="flex items-start p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <div className="flex-shrink-0">
@@ -284,7 +281,7 @@ const CoursePerformance = () => {
               </div>
             </div>
           )}
-          
+
           {performanceData.averageSatisfaction >= 4.0 && (
             <div className="flex items-start p-3 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex-shrink-0">

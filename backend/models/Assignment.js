@@ -36,7 +36,7 @@ const assignmentSchema = new mongoose.Schema({
     type: Date,
     required: [true, 'Due date is required'],
     validate: {
-      validator: function(value) {
+      validator: function (value) {
         return value && value > new Date();
       },
       message: 'Due date must be in the future'
@@ -70,23 +70,23 @@ assignmentSchema.index({ dueDate: 1 });
 assignmentSchema.index({ isPublished: 1 });
 
 // Virtual to check if assignment is overdue
-assignmentSchema.virtual('isOverdue').get(function() {
+assignmentSchema.virtual('isOverdue').get(function () {
   return this.dueDate ? new Date() > this.dueDate : false;
 });
 
 // Virtual to get formatted due date
-assignmentSchema.virtual('formattedDueDate').get(function() {
+assignmentSchema.virtual('formattedDueDate').get(function () {
   return this.dueDate ? this.dueDate.toISOString().split('T')[0] : '';
 });
 
 // Virtual to get time until due
-assignmentSchema.virtual('timeUntilDue').get(function() {
+assignmentSchema.virtual('timeUntilDue').get(function () {
   if (!this.dueDate) return 'No due date';
-  
+
   const now = new Date();
   const diffTime = this.dueDate - now;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays < 0) {
     return `${Math.abs(diffDays)} days overdue`;
   } else if (diffDays === 0) {

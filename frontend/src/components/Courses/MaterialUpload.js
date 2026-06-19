@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { 
+import {
   CloudArrowUpIcon,
   DocumentIcon,
   PlayIcon,
@@ -29,7 +29,7 @@ const MaterialUpload = ({ courseId, onUploadSuccess, onCancel }) => {
         toast.error('File size must be less than 100MB');
         return;
       }
-      
+
       setFormData({
         ...formData,
         file,
@@ -58,7 +58,7 @@ const MaterialUpload = ({ courseId, onUploadSuccess, onCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim()) {
       toast.error('Title is required');
       return;
@@ -92,7 +92,7 @@ const MaterialUpload = ({ courseId, onUploadSuccess, onCancel }) => {
       };
 
       await axios.post(`/api/courses/${courseId}/material`, materialData);
-      
+
       toast.success('Material uploaded successfully!');
       onUploadSuccess();
     } catch (error) {
@@ -116,7 +116,7 @@ const MaterialUpload = ({ courseId, onUploadSuccess, onCancel }) => {
   return (
     <div className="card">
       <h3 className="text-lg font-semibold mb-4">Upload Course Material</h3>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Title */}
         <div>
@@ -155,7 +155,7 @@ const MaterialUpload = ({ courseId, onUploadSuccess, onCancel }) => {
           <label className="block text-sm font-medium text-gray-700">
             Content Source
           </label>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* File Upload */}
             <div>
@@ -245,7 +245,7 @@ const MaterialUpload = ({ courseId, onUploadSuccess, onCancel }) => {
               </label>
             </div>
           </div>
-          
+
           <div className="mt-3 p-3 bg-white rounded border">
             <div className="flex items-center space-x-2">
               <PreviewIcon className="h-5 w-5 text-gray-500" />

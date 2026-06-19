@@ -15,18 +15,18 @@ router.get('/inbox', auth, async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    const messages = await Message.find({ 
+    const messages = await Message.find({
       receiver: req.user._id,
-      isDeleted: false 
+      isDeleted: false
     })
-    .populate('sender', 'firstName lastName email role')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+      .populate('sender', 'firstName lastName email role')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    const total = await Message.countDocuments({ 
+    const total = await Message.countDocuments({
       receiver: req.user._id,
-      isDeleted: false 
+      isDeleted: false
     });
 
     res.json({
@@ -48,12 +48,12 @@ router.get('/inbox', auth, async (req, res) => {
 // @access  Private
 router.get('/sent', auth, async (req, res) => {
   try {
-    const messages = await Message.find({ 
+    const messages = await Message.find({
       sender: req.user._id,
-      isDeleted: false 
+      isDeleted: false
     })
-    .populate('receiver', 'firstName lastName email role')
-    .sort({ createdAt: -1 });
+      .populate('receiver', 'firstName lastName email role')
+      .sort({ createdAt: -1 });
 
     res.json(messages);
   } catch (error) {
@@ -74,9 +74,9 @@ router.post('/', [
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
-        message: 'Validation errors', 
-        errors: errors.array() 
+      return res.status(400).json({
+        message: 'Validation errors',
+        errors: errors.array()
       });
     }
 
@@ -112,7 +112,7 @@ router.post('/', [
 router.put('/:id/read', auth, async (req, res) => {
   try {
     const message = await Message.findById(req.params.id);
-    
+
     if (!message) {
       return res.status(404).json({ message: 'Message not found' });
     }
@@ -136,12 +136,12 @@ router.put('/:id/read', auth, async (req, res) => {
 // @access  Private
 router.get('/users', auth, async (req, res) => {
   try {
-    const users = await User.find({ 
+    const users = await User.find({
       _id: { $ne: req.user._id },
-      isActive: true 
+      isActive: true
     })
-    .select('firstName lastName email role')
-    .sort({ firstName: 1 });
+      .select('firstName lastName email role')
+      .sort({ firstName: 1 });
 
     res.json(users);
   } catch (error) {

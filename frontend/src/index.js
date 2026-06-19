@@ -14,7 +14,7 @@ root.render(
   <React.StrictMode>
     <AuthProvider>
       <App />
-      <Toaster 
+      <Toaster
         position="top-right"
         toastOptions={{
           duration: 4000,

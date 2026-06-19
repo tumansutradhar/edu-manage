@@ -44,7 +44,7 @@ const gradeSchema = new mongoose.Schema({
 gradeSchema.index({ student: 1, course: 1 }, { unique: true });
 
 // Calculate letter grade and GPA before saving
-gradeSchema.pre('save', function(next) {
+gradeSchema.pre('save', function (next) {
   if (this.percentage !== undefined) {
     // Calculate letter grade
     if (this.percentage >= 97) this.letterGrade = 'A+';

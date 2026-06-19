@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from 'react'; // Added useCallback h
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import { 
-  BookOpenIcon, 
-  DocumentTextIcon, 
-  CalendarIcon, 
+import {
+  BookOpenIcon,
+  DocumentTextIcon,
+  CalendarIcon,
   ChartBarIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
@@ -27,7 +27,7 @@ const StudentDashboard = () => {
   const calculateAttendanceRate = useCallback(() => {
     const enrollments = dashboardData?.enrollments || [];
     if (enrollments.length === 0) return 'N/A';
-    const avg = enrollments.reduce((sum, enrollment) => 
+    const avg = enrollments.reduce((sum, enrollment) =>
       sum + (enrollment.attendance?.attendancePercentage || 0), 0) / enrollments.length;
     return `${avg.toFixed(1)}%`;
   }, [dashboardData?.enrollments]);
@@ -144,7 +144,7 @@ const StudentDashboard = () => {
               View all
             </Link>
           </div>
-          
+
           {upcomingDeadlines.length === 0 ? (
             <p className="text-gray-500 text-center py-4">No upcoming deadlines</p>
           ) : (
@@ -173,7 +173,7 @@ const StudentDashboard = () => {
               View all
             </Link>
           </div>
-          
+
           {dashboardData?.grades?.slice(0, 5).map((grade) => (
             <div key={grade._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
               <div>

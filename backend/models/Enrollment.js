@@ -62,9 +62,9 @@ enrollmentSchema.index({ course: 1 });
 enrollmentSchema.index({ status: 1 });
 
 // Calculate attendance percentage before saving
-enrollmentSchema.pre('save', function(next) {
+enrollmentSchema.pre('save', function (next) {
   if (this.attendance.totalClasses > 0) {
-    this.attendance.attendancePercentage = 
+    this.attendance.attendancePercentage =
       (this.attendance.attendedClasses / this.attendance.totalClasses) * 100;
   }
   next();

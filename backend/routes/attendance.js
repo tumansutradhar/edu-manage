@@ -21,9 +21,9 @@ router.post('/', [
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
-        message: 'Validation errors', 
-        errors: errors.array() 
+      return res.status(400).json({
+        message: 'Validation errors',
+        errors: errors.array()
       });
     }
 
@@ -61,8 +61,8 @@ router.post('/', [
     for (const studentAttendance of students) {
       await Enrollment.findOneAndUpdate(
         { student: studentAttendance.student, course: courseId },
-        { 
-          $inc: { 
+        {
+          $inc: {
             'attendance.totalClasses': 1,
             'attendance.attendedClasses': studentAttendance.status === 'present' ? 1 : 0
           }

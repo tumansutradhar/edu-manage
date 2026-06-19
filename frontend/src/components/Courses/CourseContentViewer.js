@@ -77,8 +77,8 @@ const CourseContentViewer = ({
                             <div
                                 key={material._id || index}
                                 className={`relative p-4 border rounded-lg transition-all ${canAccess
-                                        ? 'border-gray-200 hover:border-blue-300 hover:shadow-sm cursor-pointer'
-                                        : 'border-gray-100 bg-gray-50'
+                                    ? 'border-gray-200 hover:border-blue-300 hover:shadow-sm cursor-pointer'
+                                    : 'border-gray-100 bg-gray-50'
                                     }`}
                                 onClick={() => canAccess && setSelectedMaterial(material)}
                             >
